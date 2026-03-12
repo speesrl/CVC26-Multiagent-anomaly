@@ -1,0 +1,30 @@
+# Cascaded Surveillance Anomaly Detection
+# Python 3.10+ required
+
+# Deep Learning
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Object Detection
+ultralytics>=8.0.0
+
+# Image Processing
+opencv-python>=4.8.0
+Pillow>=10.0.0
+scikit-image>=0.21.0
+
+# Machine Learning & Metrics
+scikit-learn>=1.3.0
+numpy>=1.24.0
+
+# Visualization
+matplotlib>=3.7.0
+
+# Utilities
+tqdm>=4.65.0
+
+# System Monitoring (multi-agent benchmark)
+psutil>=5.9.0
+
+# Optional: LPIPS for perceptual similarity
+# lpips>=0.1.4

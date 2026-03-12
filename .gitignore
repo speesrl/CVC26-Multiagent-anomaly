@@ -98,6 +98,13 @@ generate_paper_figures.py
 .cache/
 *.cache
 
+# CVC26 paper assets (not part of code release)
+CVC26_Anomaly.pdf
+template.tex
+sample.bib
+generate_methodology_diagram.py
+generate_paper_figures.py
+
 # Coverage
 htmlcov/
 .tox/
