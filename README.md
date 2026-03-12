@@ -32,6 +32,13 @@
 
 This repository contains the official implementation of **"Cascaded Surveillance Anomaly Detection with Vision–Language Foundation Model Reasoning and Semantic Label Stabilization"**.
 
+The project targets **large‑scale camera networks** (e.g., smart‑city CCTV, industrial plants, critical infrastructure), where operators must monitor many streams in real time but can only escalate a **small subset of truly suspicious events** to expensive vision–language models (VLMs). The codebase implements the full cascaded system, evaluation pipeline, and multi‑agent coordination logic described in the paper, so that reviewers and practitioners can:
+
+- Reproduce the **frame‑level detection metrics** on UCF‑Crime.  
+- Validate **cross‑dataset generalisation** on ShanghaiTech Campus and XD‑Violence.  
+- Measure **per‑stage latency and early‑exit behaviour** under different loads.  
+- Benchmark the **multi‑agent, multi‑stream scheduling strategy** for latency‑constrained VLM calls.
+
 We propose a **three-stage cascaded pipeline** for real-time surveillance anomaly detection that combines:
 
 | Stage | Component | Purpose | Latency |
@@ -50,6 +57,40 @@ Traditional approaches process every frame through expensive models. Our cascade
 ├── 95% of frames exit at Stage II (never reach VLM)
 └── Only true anomalies trigger full pipeline
 ```
+
+---
+
+## 📚 Project Description
+
+At a high level, the project is structured around **four interacting components**:
+
+- **Stage I – Autoencoder Gate (`ConvAutoencoder`)**  
+  - Learns to reconstruct only *normal* surveillance frames at \(128 \times 128\) resolution.  
+  - Computes a per‑frame MSE reconstruction error that becomes the **primary anomaly score**.  
+  - Implements a tunable threshold \( \tau \) that decides whether a frame is normal (early exit) or suspicious (forwarded to Stage II).
+
+- **Stage II – Semantic Object Detector (YOLOv8‑nano)**  
+  - Runs only on frames that pass the AE gate.  
+  - Detects **persons and contextual objects** (e.g. vehicles, bags) using Ultralytics YOLOv8.  
+  - Encodes whether a suspicious frame contains people, enabling a split between **texture / environmental anomalies** and **person‑centric events**.
+
+- **Stage III – Vision–Language Model (VLM)**  
+  - Invoked only for **person‑containing anomalies**, drastically reducing the number of expensive calls.  
+  - Given a frame crop and a prompt (“Describe the anomalous activity in this surveillance frame”), maps events into stable semantic categories such as `person_intrusion`, `violent_activity`, `theft_attempt`, etc.  
+  - This stage is model‑agnostic: the code treats the VLM as an external black box with configurable latency, which is important for the **multi‑agent latency analysis**.
+
+- **Multi‑Agent Coordination Layer**  
+  - Models each camera stream as an independent “agent” feeding frames into a shared processing queue.  
+  - Implements **event‑driven vs. cyclical agent modes**, and measures throughput, queue depth, dropped frames, and scaling efficiency as the number of streams grows (1, 2, 4, 8, 16).  
+  - Provides detailed system‑level metrics so reviewers can see how the cascade behaves under **realistic multi‑stream load**, not just on a single offline video.
+
+On top of these core components, the repository includes:
+
+- Dataset loaders for **UCF‑Crime**, **ShanghaiTech Campus**, and **XD‑Violence**.  
+- A shared **metrics module** (`metrics.py`) implementing frame‑ and video‑level AUC, AP, F1, and optimal threshold search.  
+- Utility scripts to generate the **tables and plots** used in the paper (without shipping any LaTeX or figure‑generation code).
+
+Taken together, the repo is intended to serve both as a **reproducible research artifact for CVC 2026** and as a **reference implementation** for engineers building cascaded, multi‑agent VLM‑based surveillance systems.
 
 ---
 
